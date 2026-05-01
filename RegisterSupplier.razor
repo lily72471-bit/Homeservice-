@@ -16,7 +16,6 @@
 }
 
 <div class="auth-form">
-    @* 👤 زانیارییە کەسییەکان: ناو و مۆبایل *@
     <div class="form-row-2">
         <div class="form-group">
             <label class="form-label">Full Name</label>
@@ -33,7 +32,6 @@
             </div>
         </div>
     </div>
-    @* 📧 ئیمەیڵ و ناونیشان *@
     <div class="form-group">
         <label class="form-label">Email Address</label>
         <div class="input-icon-wrap">
@@ -49,13 +47,11 @@
             <input type="text" class="form-input" placeholder="Sulaymaniyah" @bind="address" />
         </div>
     </div>
-    @* 🛠️ بەشی پیشەیی: پسپۆڕی و ساڵانی ئەزموون *@
     <div class="form-row-2">
         <div class="form-group">
             <label class="form-label">Specialization <span style="color: #EF4444;">*</span></label>
             <div class="input-icon-wrap">
                 <i class="bi bi-tools input-icon"></i>
-                @* 📝 لیستی پسپۆڕییەکان: ڕێگە دەدات بە وەستاکە جۆری کارەکەی دیاری بکات *@
                 <select class="form-input" @bind="specialization">
                     <option value="">Select specialization</option>
                     <option value="Plumbing">Plumbing</option>
@@ -79,7 +75,6 @@
             </div>
         </div>
     </div>
-    @* 🔒 وشەی تێپەڕ *@
     <div class="form-row-2">
         <div class="form-group">
             <label class="form-label">Password</label>
@@ -96,17 +91,14 @@
             </div>
         </div>
     </div>
-    @* 🔘 دوگمەی سەرەکی ناونووسینی دابینکەر *@
     <button class="btn-auth-primary" @onclick="HandleRegister" disabled="@isLoading">
         @if (isLoading)
         {
-            @* 🔄 کاتێک داتاکان دەنێردرێت بۆ سێرڤەر *@
             <span class="btn-spinner"></span>
             <span>Creating account...</span>
         }
         else
         {
-            @* ✨ باری ئاسایی *@
             <i class="bi bi-person-badge-fill"></i>
             <span>Create Supplier Account</span>
         }
@@ -114,7 +106,6 @@
 </div>
 
 <div class="auth-divider"><span>or</span></div>
-@* 🏠 ڕێنماییکردنی ئەو کەسانەی بە هەڵە هاتوونەتە لاپەڕەی وەستاکان *@
 <div class="auth-footer" style="flex-direction: column; gap: 12px;">
     <span>Looking for services?</span>
     <button class="btn-auth-secondary" @onclick='() => Nav.NavigateTo("/register/customer")'>
@@ -122,7 +113,6 @@
         <span>Register as Customer</span>
     </button>
 </div>
-@* 🔑 گەڕانەوە بۆ لۆگین *@
 <div class="auth-footer">
     <span>Already have an account?</span>
     <button class="btn-auth-secondary" @onclick='() => Nav.NavigateTo("/login")'>
@@ -132,47 +122,40 @@
 </div>
 
 @code {
-    // 📝 پێناسەکردنی گۆڕاوەکان بۆ هەڵگرتنی داتای دابینکەر
     private string fullName = string.Empty;
     private string email = string.Empty;
     private string phone = string.Empty;
     private string address = string.Empty;
-    private string specialization = string.Empty;  // پسپۆڕی (وەک کارەبا، بۆری، ...)
-    private int experienceYears = 0;  // ساڵانی شارەزایی
+    private string specialization = string.Empty; 
+    private int experienceYears = 0;  
     private string password = string.Empty;
     private string confirmPassword = string.Empty;
     private string errorMessage = string.Empty;
     private bool isLoading = false;
-    // 🛡️ پاراستنی لاپەڕەکە: ڕێگری لە بەکارهێنەری لۆگین بوو
     protected override void OnInitialized()
     {
         if (AppState.IsLoggedIn)
             Nav.NavigateTo(AppState.IsAdmin ? "/admin" : "/", true);
     }
-    // 🚀 میتۆدی ناردنی داتاکان بۆ سێرڤەر
     private async Task HandleRegister()
     {
         errorMessage = string.Empty;
-        // 1️⃣ پشکنینی خانە ناچارییەکان (ناوی پسپۆڕی لێرە زیاد کراوە)
         if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) || 
             string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(specialization))
         { 
             errorMessage = "Please fill in all required fields (Name, Email, Password, Specialization)."; 
             return; 
         }
-        // 2️⃣ پشکنینی وشەی تێپەڕ
         if (password.Length < 6)
         { errorMessage = "Password must be at least 6 characters."; return; }
 
         if (password != confirmPassword)
         { errorMessage = "Passwords do not match."; return; }
-        // 3️⃣ پشکنینی لۆژیکی: ناکرێت ئەزموون لە سفر کەمتر بێت
         if (experienceYears < 0)
         { errorMessage = "Experience years cannot be negative."; return; }
 
         isLoading = true;
-        StateHasChanged();  // بۆ چالاککردنی سپینەری ناو دوگمەکە
-        // 4️⃣ بانگکردنی میتۆدی تایبەت بە دابینکەر لە AppState
+        StateHasChanged(); 
         string? error = await AppState.RegisterSupplierAsync(
             fullName.Trim(), 
             email.Trim(), 
@@ -185,10 +168,8 @@
         isLoading = false;
 
         if (error == null)
-            // ئەگەر هەموو شتێک باش بوو، بیبە بۆ لاپەڕەی سەرەکی یان داشبۆرد
             Nav.NavigateTo("/", true);
         else
-            // نیشاندانی هەڵەکانی سێرڤەر (بۆ نموونە: ئیمەیڵەکە پێشتر بەکارهاتووە)
             errorMessage = error;
     }
 }
