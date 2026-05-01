@@ -3,14 +3,10 @@
 @inject CustomerApiService CustomerApi
 @inject NavigationManager Nav
 @implements IDisposable
-@* 📱 قاوغی ئەپڵیکەیشن: کۆنتێنەری سەرەکی بۆ هەموو بەشەکانی کڕیار *@
 <div class="app-shell">
-    @* ⬅️ سایدبار: بەکارهێنانی کلاسێکی داینامیکی بۆ بچووککردنەوە و گەورەکردن *@
     <aside class="sidebar @(IsSidebarCollapsed ? "collapsed" : "")">
-        @* 🔝 سەری سایدبار: شوێنی لۆگۆ و ناوی براندەکە *@
         <div class="sidebar-header">
             <div class="logo-area">
-                @* 🏠 ئایکۆنی لۆگۆ: bi-house-gear-fill کە ناسنامەی ServiceHubـە *@
                 <div class="logo-icon">
                     <i class="bi bi-house-gear-fill"></i>
                 </div>
@@ -18,86 +14,62 @@
                 {
                     <div class="logo-text">
                         <span class="app-name">Home Services</span>
-                        @* ✨ نیشانەیەکی بچووک بۆ جیاکردنەوەی پانێڵی کڕیار لە ئەدمین *@
                         <span class="app-tagline">Customer Panel</span>
                     </div>
                 }
             </div>
-            @* ↔️ دوگمەی بچووککردنەوە و گەورەکردن: وەک هێمایەکی بصری (Visual Cue) کار دەکات *@
             <button class="sidebar-toggle" @onclick="ToggleSidebar" title="@(IsSidebarCollapsed ? "Expand" : "Collapse")">
-                @* 🔄 گۆڕینی ئایکۆنەکە بەپێی بارودۆخی سایدبارەکە *@
                 <i class="bi @(IsSidebarCollapsed ? "bi-chevron-right" : "bi-chevron-left")"></i>
             </button>
         </div>
-        @* 🗺️ لیستەی گەڕان و بەستەرەکان (Navigation) *@
         <nav class="sidebar-nav">
-            @* 📂 جیاکردنەوەی بەشەکان: بۆ ئەوەی مێنۆکە ڕێک و پێک بێت *@
             <div class="nav-section">
                 @if (!IsSidebarCollapsed) { <span class="nav-section-label">Main</span> }
-                @* 🏠 بەستەری سەرەکی (Home): بەکارهێنانی NavLink بۆ دیاریکردنی لاپەڕەی ئێستا *@
-                @* Match="NavLinkMatch.All" زۆر گرنگە بۆ ئەوەی تەنها کاتێک "Active" بێت کە کڕیار لە سەرەتای پانێڵەکەدایە *@
                 <NavLink class="nav-item" href="" Match="NavLinkMatch.All" title="Home">
-                    @* 🏘️ ئایکۆنی ماڵ: هێمایە بۆ لاپەڕەی سەرەکی و دەستپێک *@
                     <i class="bi bi-house-fill"></i>
-                    @* 📝 نیشاندانی ناوی "Home" ئەگەر سایدبارەکە کراوە بێت *@
                     @if (!IsSidebarCollapsed) { <span>Home</span> }
                 </NavLink>
-                @* 🔍 بەستەری گەڕان: شوێنی سەرەکی بۆ دۆزینەوەی وەستا و پیشەوەرەکان *@
                 <NavLink class="nav-item" href="search" title="Search Services">
-                    @* 🔎 ئایکۆنی گەڕانی کلاسیکی (Magnifying Glass) *@
                     <i class="bi bi-search"></i>
-                    @* 📝 نیشاندانی ناوی "Search" ئەگەر سایدبارەکە کراوە بێت *@
                     @if (!IsSidebarCollapsed) { <span>Search</span> }
                 </NavLink>
-                @* 🧾 بەستەری داواکارییەکان (Orders): شوێنی بینینی وەسڵ و مێژووی کارەکان *@
                 <NavLink class="nav-item" href="orders" title="My Orders">
-                    @* 📄 ئایکۆنی وەسڵ (Receipt): هێمایە بۆ لایەنی دارایی و کۆتایی هاتنی کارەکە *@
                     <i class="bi bi-receipt-cutoff"></i>
                     @if (!IsSidebarCollapsed) { <span>My Orders</span>
-                        @* 🔴 نیشانەی ئاگادارکردنەوە (Notification Badge):
-               تەنها کاتێک دەردەکەوێت کە کڕیار داواکارییەکی هەبێت کە هێشتا کاری لەسەر دەکرێت *@
+                      
                         @if (pendingCount > 0)
                         {
                             <span class="badge">@pendingCount</span>
                         }
                     }
                 </NavLink>
-                @* 📦 تێبینی: بەشی پاکێجەکان (Packages) بە کۆمێنت جێهێڵدراوە بۆ داهاتوو
-       ئەگەر ویستت خزمەتگوزاری بە شێوەی کۆمەڵ (Bundle) بفرۆشیت *@
+              
                 <!-- <NavLink class="nav-item" href="packages" title="Packages">
                     <i class="bi bi-box-seam-fill"></i>
                     @if (!IsSidebarCollapsed) { <span>Packages</span> }
                 </NavLink> -->
             </div>
-            @* 👤 بەشی نوێ: بۆ زانیارییە کەسییەکان و ڕێکخستنی ئەکاونت *@
             <div class="nav-section">
-                @* 🏷️ لێبڵی بەشی خزمەتگوزارییەکان *@
                 @if (!IsSidebarCollapsed) { <span class="nav-section-label">Services</span> }
-                @* 🔄 ڕیزکردنی پۆلێنە سەرەکییەکان بە شێوەی داینامیکی *@
                 @foreach (var cat in topCategories)
                 {
                     <NavLink class="nav-item" href="@($"services/{cat.Id}")" title="@cat.Name">
-                        @* 🎨 ئایکۆنەکە لە داتابەیسەوە دەخوێنرێتەوە (بۆ نموونە: bi-tools) *@
                         <i class="bi @cat.Icon"></i>
-                        @* 🏷️ نیشاندانی ناوی پۆلێنەکە ئەگەر سایدبارەکە کراوە بێت *@
                         @if (!IsSidebarCollapsed) { <span>@cat.Name</span> }
                     </NavLink>
                 }
             </div>
 
             <div class="nav-section">
-                @* 👤 بەشی ئەکاونت: بۆ بەڕێوەبردنی زانیارییە کەسییەکان *@
                 @if (!IsSidebarCollapsed) { <span class="nav-section-label">Account</span> }
                 <!-- <NavLink class="nav-item" href="worker-registration" title="Become a Pro">
                     <i class="bi bi-person-badge-fill"></i>
                     @if (!IsSidebarCollapsed) { <span>Become a Pro</span> }
                 </NavLink> -->
-                @* 🛠️ بیرۆکەی "Become a Pro": بۆ ئەوەی کڕیار بتوانێت ببێتە دابینکەر (جارێ سڕاوەتەوە) *@
                 <NavLink class="nav-item" href="profile" title="My Profile">
                     <i class="bi bi-person-circle"></i>
                     @if (!IsSidebarCollapsed) { <span>My Profile</span> }
                 </NavLink>
-                @* ⚙️ ڕێکخستنەکان (Settings): بۆ داهاتوو پارێزراوە *@
                 <!-- <NavLink class="nav-item" href="settings" title="Settings">
                     <i class="bi bi-gear-fill"></i>
                     @if (!IsSidebarCollapsed) { <span>Settings</span> }
@@ -105,9 +77,7 @@
 
             </div>
         </nav>
-        @* 💳 بەشی جزدان (Wallet):
-           لێرەدا کۆدەکەت ئامادەیە بۆ نیشاندانی باڵانسی کڕیار، 
-           کە یارمەتیدەرە بۆ ئەوەی کڕیار خێراتر پارەی خزمەتگوزارییەکان بدات *@
+       
  <!-- <div class="wallet-card">
                     <div class="wallet-icon"><i class="bi bi-wallet2"></i></div>
                     <div class="wallet-info">
@@ -119,7 +89,6 @@
 <!-- <div class="wallet-card compact" title="Wallet: $@AppState.CurrentUser.WalletBalance.ToString("F2")">
                     <div class="wallet-icon"><i class="bi bi-wallet2"></i></div>
                 </div> -->
-        @* 🚪 بەشی Logout: جیاکردنەوەی شێوازی دوگمەکە بەپێی قەبارەی سایدبار *@
         <div class="sidebar-footer">
             @if (!IsSidebarCollapsed)
             {
@@ -129,18 +98,15 @@
             }
             else
             {
-                @* 🤏 لە باری بچووکدا تەنها ئایکۆنەکە نیشان دەدەین *@
                 <button class="sidebar-logout-btn-compact" @onclick="Logout" title="Logout">
                     <i class="bi bi-box-arrow-left"></i>
                 </button>
             }
         </div>
     </aside>
-    @* 🚀 ناوچەی سەرەکی (Main Content) *@
     <main class="main-content">
         <header class="top-bar">
             <div class="top-bar-left">
-                @* 📍 ناونیشانی لاپەڕەکە بە داینامیکی لەڕێگەی میتۆدی GetPageTitle *@
                 <h1 class="page-title">@GetPageTitle()</h1>
             </div>
             <div class="top-bar-right">
@@ -148,13 +114,11 @@
                     <i class="bi bi-bell"></i>
                     <span class="notification-dot"></span>
                 </button> -->
-                @* 👤 وێنەی پڕۆفایل (Avatar): نیشاندانی پیتی یەکەمی ناوەکە *@
                 <div class="user-avatar" @onclick='() => Nav.NavigateTo("/profile")'>
                     <span>@GetInitials()</span>
                 </div>
             </div>
         </header>
-        @* 🖼️ شوێنی ڕێندەربوونی لاپەڕەکان (Home, Search, Orders, هتد) *@
         <div class="content-area">
             @Body
         </div>
@@ -162,48 +126,39 @@
 </div>
 
 @code {
-    @* 🛠️ باری ڕوکار: بۆ کۆنتڕۆڵکردنی سایدبار *@
     private bool IsSidebarCollapsed = false;
     private int pendingCount;
     private List<CatalogCategory> topCategories = [];
 
     protected override async Task OnInitializedAsync()
     {
-        @* 🛡️ پاراستنی لاپەڕە: ئەگەر لۆگین نەبێت، دەچێتەوە بۆ Login *@
         if (!AppState.IsLoggedIn)
         { Nav.NavigateTo("/login", true); return; }
-        @* 🔗 بەستنەوەی ڕووداو: نوێکردنەوەی UI کاتێک گۆڕانکاری لە AppState ڕوودەدات *@
         AppState.OnStateChanged += HandleStateChanged;
         await LoadDataAsync();
     }
-    @* 📡 هێنانەوەی داتا داینامیکییەکان بۆ پانێڵی کڕیار *@
     private async Task LoadDataAsync()
     {
-        @* 📋 ژمارەی ئەو داواکارییانەی هێشتا وەک 'Pending' یان 'Confirmed' ماونەتەوە *@
         var userId = AppState.CurrentAppUser?.Id ?? 0;
         if (userId > 0)
         {
             var orders = await CustomerApi.GetMyOrdersAsync(userId);
             pendingCount = orders.Count(o => o.Status is "Pending" or "Confirmed");
         }
-        @* 🗂️ هێنانەوەی 5 پۆلێنی سەرەکی بۆ ناو سایدبارەکە *@
 
         var cats = await CustomerApi.GetCategoriesAsync();
         topCategories = cats.Take(5).ToList();
     }
-    @* 🔄 نوێکردنەوەی خۆکار کاتێک داتا دەگۆڕێت *@
     private void HandleStateChanged() => InvokeAsync(async () => { await LoadDataAsync(); StateHasChanged(); });
 
     private void UpdateCounts() { } // kept for compatibility
 
     private void ToggleSidebar() => IsSidebarCollapsed = !IsSidebarCollapsed;
-    @* 🚪 چوونەدەرەوە *@
     private void Logout()
     {
         AppState.Logout();
         Nav.NavigateTo("/login", true);
     }
-    @* 📍 دیاریکردنی ناونیشانی لاپەڕەکە بەپێی URL *@
     private string GetPageTitle()
     {
         var uri = Nav.ToBaseRelativePath(Nav.Uri);
@@ -221,7 +176,6 @@
             _ => "ServiceHub"
         };
     }
-    @* 🔠 دروستکردنی کورتکراوەی ناو (Initials) بۆ ئاڤەتارەکە *@
     private string GetInitials()
     {
         var parts = AppState.CurrentUser.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -229,7 +183,6 @@
             ? $"{parts[0][0]}{parts[1][0]}"
             : parts.Length == 1 ? $"{parts[0][0]}" : "U";
     }
-    @* 🧹 لابردنی بەستەری ڕووداوەکان بۆ ڕێگری لە Memory Leak *@
     public void Dispose()
     {
         AppState.OnStateChanged -= HandleStateChanged;
