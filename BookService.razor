@@ -1,0 +1,265 @@
+@page "/book/{ServiceId:int}"
+@inject AppStateService AppState
+@inject CustomerApiService CustomerApi
+@inject NavigationManager Nav
+@* 🔙 دوگمەی گەڕانەوە: بۆ چوونەوە بۆ لاپەڕەی پێشوو *@
+<button class="back-btn" @onclick="GoBack">
+    <i class="bi bi-arrow-left"></i> Back
+</button>
+@* 🔄 باری بارکردن: کاتێک داتاکان لە داتابەیسەوە دەهێنرێن *@
+@if (loading)
+{
+    <div class="loading-spinner"><i class="bi bi-arrow-repeat spin"></i> Loading service...</div>
+}
+@* ✅ پەیامی سەرکەوتن: کاتێک کڕیار بە سەرکەوتوویی خزمەتگوزارییەکەی حیجز کرد *@
+else if (showSuccess)
+{
+    <div class="alert alert-success" style="margin-top:16px;">
+        <i class="bi bi-check-circle-fill"></i>
+        Service booked successfully! Your order has been placed.
+    </div>
+}
+@* 📄 پیشاندانی وردەکارییەکان: ئەگەر خزمەتگوزارییەکە بوونی هەبوو *@
+else if (service != null)
+{
+    <div class="detail-page">
+        @* 🏗️ سەردێڕی وردەکاری: نیشاندانی ناو، وەسف و ئایکۆنی خزمەتگوزارییەکە *@
+        <div class="detail-header">
+            <div class="detail-icon">
+                <i class="bi @service.Icon"></i>
+            </div>
+            <div class="detail-info">
+                <h2>@service.Name</h2>
+                <p>@service.Description</p>
+                @* ⭐ ئامارەکان: نیشاندانی هەڵسەنگاندن و کاتی خایەنراو *@
+                <div class="service-meta" style="margin-top: 8px;">
+                    <span class="rating"><i class="bi bi-star-fill" style="color: #FFC107;"></i> @service.Rating</span>
+                    <span>(@service.ReviewCount reviews)</span>
+                    <span style="margin-left: 8px;"><i class="bi bi-clock"></i> @service.EstimatedDuration</span>
+                </div>
+            </div>
+        </div>
+        @* 💳 کارتی پوختە (Summary Card): نیشاندانی نرخ و زانیارییە داراییەکان *@
+        <div class="summary-card">
+            @* 💰 نرخی سەرەکی *@
+            <div class="summary-row">
+                <span class="label">Base Price</span>
+                <span class="value">@service.BasePrice.ToString("N0") IQD</span>
+            </div>
+            @* 📁 جۆری خزمەتگوزاری *@
+            <div class="summary-row">
+                <span class="label">Category</span>
+                <span class="value">@categoryName</span>
+            </div>
+            @* ⏱️ کاتی پێشبینیکراو *@
+            <div class="summary-row">
+                <span class="label">Estimated Duration</span>
+                <span class="value">@service.EstimatedDuration</span>
+            </div>
+        </div>
+        @* 📝 فۆرمی داواکاری: بەستنەوەی فۆرمەکە بە مۆدێلی order و بانگکردنی HandleSubmit لە کاتی ناردن *@
+        <EditForm Model="order" OnValidSubmit="HandleSubmit">
+            @* 📅 بەشی کات: دیاریکردنی ڕۆژ و کاتی گونجاو بۆ خزمەتگوزارییەکە *@
+            <div class="form-section">
+                <h3><i class="bi bi-calendar-event"></i> Schedule</h3>
+                <div class="form-row">
+                    @* 🗓️ دیاریکردنی ڕێکەوت: بەستنەوە بە ScheduledDate و ڕێگریکردن لە هەڵبژاردنی ڕابردوو *@
+                    <div class="form-group">
+                        <label>Preferred Date <span class="required">*</span></label>
+                        <InputDate class="form-control" @bind-Value="order.ScheduledDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    @* ⏰ دیاریکردنی کات: لیستێک بۆ هەڵبژاردنی کاتی دیاریکراو *@
+                    <div class="form-group">
+                        <label>Preferred Time <span class="required">*</span></label>
+                        <select class="form-control" @bind="order.ScheduledTime">
+                            <option value="">Select time slot</option>
+                            <option value="8:00 AM">8:00 AM</option>
+                            <option value="9:00 AM">9:00 AM</option>
+                            <option value="10:00 AM">10:00 AM</option>
+                            <option value="11:00 AM">11:00 AM</option>
+                            <option value="12:00 PM">12:00 PM</option>
+                            <option value="1:00 PM">1:00 PM</option>
+                            <option value="2:00 PM">2:00 PM</option>
+                            <option value="3:00 PM">3:00 PM</option>
+                            <option value="4:00 PM">4:00 PM</option>
+                            <option value="5:00 PM">5:00 PM</option>
+                            <option value="6:00 PM">6:00 PM</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            @* 📍 بەشی شوێن: وەرگرتنی ناونیشانی کڕیار بۆ ئەوەی وەستاکە بزانێت بۆ کوێ بچێت *@
+            <div class="form-section">
+                <h3><i class="bi bi-geo-alt"></i> Location</h3>
+                <div class="form-group">
+                    <label>Service Address <span class="required">*</span></label>
+                    <InputText class="form-control" @bind-Value="order.Address" placeholder="Enter your full address" />
+                </div>
+            </div>
+            @* 📞 زانیاری پەیوەندی *@
+            <div class="form-section">
+                <h3><i class="bi bi-person"></i> Contact</h3>
+                <div class="form-group">
+                    <label>Phone Number <span class="required">*</span></label>
+                    <InputText class="form-control" @bind-Value="order.ContactPhone" placeholder="Enter your phone number" />
+                </div>
+            </div>
+            @* 💬 تێبینی زێدە: بۆ نووسینی هەر مەرجێک یان وەسفێکی زیادە *@
+            <div class="form-section">
+                <h3><i class="bi bi-chat-text"></i> Additional Info</h3>
+                <div class="form-group">
+                    <label>Notes / Special Instructions</label>
+                    <InputTextArea class="form-control" @bind-Value="order.Notes" placeholder="Describe any special requirements..." />
+                </div>
+            </div>
+            @* 🧾 کورتیی داواکاری: نیشاندانی تێچووی کۆتایی پێش ئەوەی کڕیار کلیک لە داواکردن بکات *@
+            <div class="summary-card">
+                <h3 style="margin-bottom: 16px; font-size: 16px; font-weight: 700;">Order Summary</h3>
+                @* 💰 نرخی خزمەتگوزاری *@
+                <div class="summary-row">
+                    <span class="label">@service.Name</span>
+                    <span class="value">@service.BasePrice.ToString("N0") IQD</span>
+                </div>
+                @* 🚚 کرێی خزمەتگوزاری یان هاتنی وەستا (Service Fee) *@
+                <div class="summary-row">
+                    <span class="label">Service Fee</span>
+                    <span class="value">5,000 IQD</span>
+                </div>
+                @* 💳 کۆی گشتی پارەکە *@
+                <div class="summary-row total">
+                    <span class="label">Total</span>
+                    <span class="value">@((service.BasePrice + 5000).ToString("N0")) IQD</span>
+                </div>
+            </div>
+            @* ⚠️ نیشاندانی هەڵە: ئەگەر کێشەیەک لە کاتی ناردنی داواکارییەکەدا ڕوو بدات *@
+            @if (!string.IsNullOrEmpty(errorMsg))
+            {
+                <div class="alert" style="background:#FFF3CD;color:#856404;border-radius:8px;padding:12px;margin-bottom:12px;">
+                    <i class="bi bi-exclamation-triangle"></i> @errorMsg
+                </div>
+            }
+            @* 🔘 دوگمەی کۆتایی: ئەنجامدانی حیجزکردنەکە *@
+            @* دوگمەکە ناچالاک دەبێت (Disabled) ئەگەر فۆرمەکە بە دروستی پڕ نەکرابێتەوە یان ئێستا خەریکی ناردن بێت *@
+            <button type="submit" class="btn btn-primary btn-lg btn-block" disabled="@(!IsFormValid() || submitting)">
+                @if (submitting) 
+                @* 🔄 نیشاندانی سپینەر لە کاتی ناردنی داتا بۆ سێرڤەر *@
+                { <i class="bi bi-arrow-repeat spin"></i> } 
+                @* ✅ نیشانەی ئامادەیی کاتێک فۆرمەکە تەواوە *@
+                else { <i class="bi bi-check-circle"></i> }
+                Confirm Booking
+            </button>
+        </EditForm>
+    </div>
+}
+else
+{
+    @* 🚫 باری بەتاڵ (Empty State): ئەگەر خزمەتگوزارییەکە لە داتابەیسدا نەبوو یان سڕابووەوە *@
+    <div class="empty-state">
+        <i class="bi bi-exclamation-triangle"></i>
+        <h3>Service not found</h3>
+        <p>The requested service doesn't exist.</p>
+        @* 🏠 دوگمەی گەڕانەوە بۆ لاپەڕەی سەرەکی *@
+        <button class="btn btn-primary" @onclick='() => Nav.NavigateTo("/")'>Go Home</button>
+    </div>
+}
+
+@code {
+    @* 🆔 وەرگرتنی پارامیتەر: ناسنامەی ئەو خزمەتگوزارییەی کە بەکارهێنەر کلیکی لێکردووە *@
+    [Parameter] public int ServiceId { get; set; }
+    @* 📄 زانیارییەکان: هەڵگرتنی وردەکاری خزمەتگوزاری و پۆلێنەکەی *@
+    private CatalogService? service;
+    private string categoryName = "General";
+    @* 🔄 باری لاپەڕە (State): کۆنترۆڵکردنی پیشاندانی لۆدینگ و پەیامەکان *@
+    private bool loading = true;
+    private bool showSuccess;
+    private bool submitting;
+    private string errorMsg = string.Empty;
+    @* 📝 مۆدێلی فۆرم: دروستکردنی نموونەیەکی نوێ لە کلاسەکە بۆ پڕکردنەوە *@
+    private BookingForm order = new();
+    @* 🏗️ کلاسی ناوەکی بۆ فۆرمەکە: دیاریکردنی ئەو خانانەی پێویستن بۆ حیجزکردن *@
+    private class BookingForm
+    {
+        @* 📅 ڕێکەوت: بە شێوەی گریمانەیی ڕۆژی داهاتوو دیاری دەکات *@
+        public DateTime ScheduledDate { get; set; } = DateTime.Today.AddDays(1);
+        public string ScheduledTime { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string ContactPhone { get; set; } = string.Empty;
+        public string Notes { get; set; } = string.Empty;
+    }
+    @* 📥 بارکردنی داتا: ئەم میتۆدە زانیارییەکانی خزمەتگوزاری و کڕیار ئامادە دەکات *@
+    protected override async Task OnParametersSetAsync()
+    {
+        @* 🔄 دەستپێکردن: نیشاندانی نیشانەی بارکردن (Loading) *@
+        loading = true;
+        @* 🔍 هێنانەوەی خزمەتگوزاری: وەرگرتنی وردەکارییەکان لە ڕێگەی ID لە API *@
+        service = await CustomerApi.GetServiceAsync(ServiceId);
+        @* ✅ ئەگەر خزمەتگوزارییەکە دۆزرایەوە: *@
+        if (service != null)
+        {
+            @* 📁 هێنانەوەی ناوی پۆلێن: گەڕان بەناو لیستی جۆرەکان بۆ دۆزینەوەی ناوی Category *@
+            var cats = await CustomerApi.GetCategoriesAsync();
+            categoryName = cats.FirstOrDefault(c => c.Id == service.CategoryId)?.Name ?? "General";
+            @* 📝 پڕکردنەوەی ئۆتۆماتیکی (Auto-fill): *@
+            @* زانیارییەکانی ناونیشان و مۆبایل لە AppState وەردەگرێت بۆ ئەوەی کار بۆ کڕیار ئاسان بێت *@
+            order = new BookingForm
+            {
+                Address      = AppState.CurrentUser?.Address ?? string.Empty,
+                ContactPhone = AppState.CurrentUser?.Phone ?? string.Empty
+            };
+        }
+        @* 🏁 کۆتایی: شاردنەوەی لۆدینگ دوای ئەوەی داتاکان گەیشتن *@
+        loading = false;
+    }
+    @* ✅ پشکنینی فۆرم: دڵنیادەبێتەوە کە هەموو خانە پێویستەکان پڕکراونەتەوە *@
+    private bool IsFormValid() =>
+        !string.IsNullOrWhiteSpace(order.Address) &&  @* ناونیشان بەتاڵ نەبێت *@
+        !string.IsNullOrWhiteSpace(order.ScheduledTime) &&  @* کات دیاریکرا بێت *@
+        !string.IsNullOrWhiteSpace(order.ContactPhone) &&   @* مۆبایل نووسرابێت *@
+        order.ScheduledDate >= DateTime.Today;   @* ڕێکەوتەکە لە ڕابردوو نەبێت *@
+    @* 🚀 ناردنی داواکاری: ناردنی داتاکانی حیجزکردن بۆ داتابەیس *@
+    private async Task HandleSubmit()
+    {
+        @* 🚀 ناردنی داواکاری: ناردنی داتاکانی حیجزکردن بۆ داتابەیس *@
+        if (!IsFormValid() || service == null || submitting) return;
+        @* 👤 پشکنینی لۆگین: وەرگرتنی IDی بەکارهێنەر *@
+        var userId = AppState.CurrentAppUser?.Id ?? 0;
+        if (userId == 0) { errorMsg = "Please log in before booking."; return; }
+
+        submitting = true;
+        errorMsg   = string.Empty;
+        @* 📦 ئامادەکردنی پاکێجی داواکاری (Request Object) *@
+        var req = new PlaceOrderRequest
+        {
+            UserId       = userId,
+            ServiceId    = service.Id,
+            ScheduledDate = order.ScheduledDate,
+            ScheduledTime = order.ScheduledTime,
+            Address      = order.Address,
+            ContactPhone = order.ContactPhone,
+            Notes        = order.Notes
+        };
+        @* 🌐 پەیوەندی بە API: تۆمارکردنی ئۆردەرەکە لە سێرڤەر *@
+        var ok = await CustomerApi.PlaceOrderAsync(req);
+        submitting = false;
+
+        if (ok)
+        {
+            @* ✨ ئەگەر سەرکەوتوو بوو: نوێکردنەوەی ئەپ و چوون بۆ لاپەڕەی ئۆردەرەکان *@
+            AppState.NotifyStateChanged();
+            showSuccess = true;
+            await Task.Delay(2000);
+            Nav.NavigateTo("/orders");
+        }
+        else
+        {
+            @* ❌ نیشاندانی هەڵە لە کاتی سەرنەکەوتن *@
+            errorMsg = "Failed to place order. Please check your connection and try again.";
+        }
+    }
+    @* 🔙 گەڕانەوە: گەڕانەوە بۆ پۆلێنی پێشوو یان لاپەڕەی سەرەکی *@
+    private void GoBack()
+    {
+        if (service != null) Nav.NavigateTo($"/services/{service.CategoryId}");
+        else Nav.NavigateTo("/");
+    }
+}

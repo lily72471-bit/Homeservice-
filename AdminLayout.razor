@@ -1,0 +1,214 @@
+@inherits LayoutComponentBase
+@inject AppStateService AppState
+@inject AdminApiService AdminApi
+@inject NavigationManager Nav
+@implements IDisposable
+@* 🏗️ میراتگری دیزاین: ئەم لاپەڕەیە هەموو تایبەتمەندییەکانی لاپەڕە بنەڕەتییەکان وەردەگرێت *@
+@* 👤 بەڕێوەبردنی دۆخ: بۆ زانینی زانیارییەکانی ئەدمین و ئاگادارکردنەوەی سیستمەکە لە گۆڕانکاری *@
+@* 📡 پەیوەندی سێرڤەر: هێنان و ناردنی داتاکان بۆ بەشی ئەدمین لە API *@
+@* 🚀 گۆڕینی لاپەڕە: بۆ گواستنەوەی بەکارهێنەر لە نێوان بەشە جیاوازەکاندا *@
+@* 🧹 پاککردنەوەی بیرگە: زۆر گرنگە! ڕێگری دەکات لەوەی ئەپەکە خاو بێتەوە *@
+
+@* 🏗️ قاوغی سەرەکی ئەدمین: هەموو ناوەڕۆکی لاپەڕەکە لەناو ئەم کڵاسەدا دەبێت *@
+<div class="admin-shell">
+    @* 📱 داپۆشەری مۆبایل (Overlay): کاتێک مێنۆکە لە مۆبایل دەکرێتەوە،
+       پاشبنەماکە تاریک دەکات و بە کلیک کردن لێی مێنۆکە دادەخرێت *@
+    <div class="admin-sidebar-overlay @(mobileMenuOpen ? "active" : "")" @onclick="CloseMobileMenu"></div>
+    @* 🔝 بەشی سەرەوەی سایدبار (Header): لێرەدا لۆگۆ و ناوی سیستمەکە دادەنرێت *@
+    <div class="admin-sidebar-header">
+
+        <div class="admin-logo">
+            @* 🛡️ ئایکۆنی لۆگۆ: بەکارهێنانی قەڵغان بۆ نیشاندانی هێز و پاراستنی سیستمەکە *@
+            <div class="admin-logo-icon">
+                <i class="bi bi-shield-fill-check"></i>
+            </div>
+
+            @* 🎈 ئەگەر سایدبارەکە بچووک نەکرابێتەوە (Not Collapsed)، ناوەکە نیشان دەدەین *@
+            @if (!collapsed)
+            {
+                <div class="admin-logo-text">
+                    @* 🏠 ناوی ئەپڵیکەیشنەکە بە فۆنتێکی دیار *@
+                    <span class="admin-app-name">Home Services</span>
+                    @* 🛡️ نیشانەی Admin بۆ ئەوەی ڕوون بێت کە ئەمە پانێڵی بەڕێوەبردنە *@
+                    <span class="admin-badge">Admin</span>
+                </div>
+            }
+        </div>
+        @* ↔️ دوگمەی بچووککردنەوە و گەورەکردن: کاتێک کلیکی لێ دەکرێت باری collapsed دەگۆڕێت *@
+        <button class="admin-toggle" @onclick="() => collapsed = !collapsed">
+            @* 🔄 ئایکۆنەکە بە داینامیکی دەگۆڕێت (بۆ دەستە چەپ یان دەستە ڕاست) بەپێی بارەکە *@
+            <i class="bi @(collapsed ? "bi-chevron-right" : "bi-chevron-left")"></i>
+        </button>
+    </div>
+
+    @* 🗺️ مێنۆی سەرەکی: کۆنتێنەری هەموو بەستەرەکانی ناو سایدبارەکە *@
+    <nav class="admin-nav">
+        @* 🏷️ لێبڵی بەشەکان: تەنها کاتێک نیشانی دەدەین کە سایدبارەکە گەورە بێت (Not Collapsed) *@
+        @if (!collapsed)
+        { <span class="admin-nav-section-label">Overview</span> }
+        @* 🏠 بەستەری داشبۆرد: بەکارهێنانی NavLink بۆ ئەوەی بە شێوەیەکی خۆکار ڕەنگی بگۆڕێت کاتێک لەو لاپەڕەیەیت *@
+        @* Match="NavLinkMatch.All" گرنگە بۆ ئەوەی تەنها کاتێک ڕەنگ بگرێت کە ڕێک لەسەر /admin بیت *@
+        <NavLink class="admin-nav-item" href="admin" Match="NavLinkMatch.All" title="Dashboard">
+            @* 📊 ئایکۆنی شەبەکە (Grid): نیشاندەری داشبۆرد و ئامارەکان *@
+            <i class="bi bi-grid-fill"></i>
+            @* 📝 دەقی بەستەرەکە: تەنها کاتێک دەردەکەوێت کە سایدبارەکە کراوە بێت *@
+            @if (!collapsed)
+            { <span>Dashboard</span> }
+        </NavLink>
+
+        @* 🏷️ لێبڵی بەشی بەڕێوەبردن: بۆ جیاکردنەوەی بەستەرە کارگێڕییەکان لە ئامارە گشتییەکان *@
+        @if (!collapsed) { <span class="admin-nav-section-label">Management</span> }
+        @* 👥 بەستەری بەکارهێنەران (Users): بەکارهێنانی ئایکۆنی کۆمەڵە خەڵک بۆ ناسینەوەی خێرا *@
+        <NavLink class="admin-nav-item" href="admin/users" title="Users">
+            <i class="bi bi-people-fill"></i>
+
+            @* 📝 نیشاندانی ناوی بەستەرەکە ئەگەر سایدبارەکە کراوە بێت *@
+            @if (!collapsed) { <span>Users</span> }
+        </NavLink>
+        @* 🛠️ بەستەری دابینکەران (Suppliers): بەکارهێنانی ئایکۆنی باج (Badge)
+           بۆ جیاکردنەوەیان لە بەکارهێنەرانی ئاسایی *@
+        <NavLink class="admin-nav-item" href="admin/suppliers" title="Suppliers">
+            <i class="bi bi-person-badge-fill"></i>
+            @if (!collapsed) { <span>Suppliers</span> }
+        </NavLink>
+        @* 🛠️ بەستەری خزمەتگوزارییەکان (Services): بەکارهێنانی ئایکۆنی "ئامرازەکان"
+           بۆ نیشاندانی لایەنی کردەیی و خزمەتگوزارییەکان *@
+        <NavLink class="admin-nav-item" href="admin/services" title="Services">
+            <i class="bi bi-tools"></i>
+            @if (!collapsed) { <span>Services</span> }
+        </NavLink>
+        @* 📅 بەستەری حیجزەکان (Bookings): بەکارهێنانی ئایکۆنی ڕۆژژمێر
+           بۆ نیشاندانی کات و خشتەی کارەکان *@
+        <NavLink class="admin-nav-item" href="admin/bookings" title="Bookings">
+            <i class="bi bi-calendar-check-fill"></i>
+            @if (!collapsed)
+            {
+                <span>Bookings</span>
+                @* 🔴 نیشانەی ئاگادارکردنەوە: تەنها کاتێک دەردەکەوێت کە حیجزی چاوەڕوانکراو (Pending) هەبێت *@
+                @if (pendingCount > 0)
+                {
+                    @* نیشاندانی ژمارەی ئەو حیجزە نوێیانەی کە هێشتا ئەدمین یان دابینکەر قبوڵی نەکردوون *@
+                    <span class="admin-badge-count">@pendingCount</span>
+                }
+            }
+        </NavLink>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+        @* 👤 ئەگەر سایدبارەکە گەورە بێت، ناوی ئەدمینەکە و ڕۆڵەکەی نیشان دەدەین *@
+        @if (!collapsed)
+        {
+            <div class="admin-user-info">
+                @* 🛡️ ئایکۆنی قەڵغان وەک وێنەی پڕۆفایل بۆ ئەدمین *@
+                <div class="admin-user-avatar">
+                    <i class="bi bi-shield-fill"></i>
+                </div>
+                <div>
+                    @* ✍️ نیشاندانی ناوی تەواوی ئەدمینەکە لە ڕێگەی AppState *@
+                    <div class="admin-user-name">@AppState.CurrentAppUser?.FullName</div>
+                    @* 🎖️ نیشانەی پلەی بەکارهێنەر (Administrator) *@
+                    <div class="admin-user-role">Administrator</div>
+                </div>
+            </div>
+        }
+        @* 🚪 دوگمەی چوونەدەرەوە: هەمیشە دیارە، چ سایدبارەکە بچووک بێت یان گەورە *@
+        <button class="admin-logout-btn" @onclick="Logout" title="Logout">
+            @* ↪️ ئایکۆنی دەرچوون بۆ دەرەوە *@
+            <i class="bi bi-box-arrow-left"></i>
+            @* 🚪 ناوی دوگمەی چوونەدەرەوە ئەگەر سایدبارەکە کراوە بێت *@
+            @if (!collapsed) { <span>Logout</span> }
+        </button>
+    </div>
+    @* 🚀 بەشی سەرەکی ئەپەکە: لێرەدا هەموو داتا و لاپەڕەکان نیشان دەدرێن *@
+    <main class="admin-main">
+        @* 🔝 باریکەی سەرەوە: بۆ نیشاندانی ناونیشانی لاپەڕە و ئامارە خێراکان *@
+        <header class="admin-top-bar">
+            <div class="admin-top-left">
+                @* 📱 دوگمەی مێنۆ بۆ مۆبایل: تەنها لە شاشەی بچووکدا دەردەکەوێت *@
+                <button class="mobile-menu-toggle" @onclick="ToggleMobileMenu">
+                    <i class="bi bi-list"></i>
+                </button>
+                @* 📍 ناونیشانی داینامیکی: بەپێی ئەوەی لە چ لاپەڕەیەکیت ناونیشانەکە دەگۆڕێت *@
+                <h1 class="admin-page-title">@GetPageTitle()</h1>
+            </div>
+            <div class="admin-top-right">
+                @* 📊 ئامارە خێراکان: ئەدمین بەبێ گۆڕینی لاپەڕە دەزانێت چەند بەکارهێنەر و داواکاری هەیە *@
+
+                <div class="admin-top-stats">
+                    <span><i class="bi bi-people-fill"></i> @userCount Users</span>
+                    <span><i class="bi bi-calendar-check-fill"></i> @pendingCount Pending</span>
+                    <!-- <button class="btn-stat-refresh" @onclick="LoadStats" title="Refresh Stats">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button> -->
+                </div>
+            </div>
+        </header>
+        @* 🖼️ ناوچەی ناوەڕۆک: لێرەدا لاپەڕەکان (Users, Suppliers, هتد) ڕێندەر دەبن *@
+        <div class="admin-content">
+            @Body
+        </div>
+    </main>
+</div>
+
+@code {
+    @* 🛠️ باری ڕوکار: بۆ کۆنتڕۆڵکردنی سایدبار و مێنۆی مۆبایل *@
+    private bool collapsed = false;
+    private bool mobileMenuOpen = false;
+    @* 📊 داتای ئامارەکان: کە لە باریکەی سەرەوە (Top Bar) نیشان دەدرێن *@
+    private int pendingCount;
+    private int userCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        @* 🛡️ قایمکردنی دەرگا: ئەگەر ئەدمین نەبێت، ڕێگەی پێنادرێت لێرە بمێنێتەوە *@
+        if (!AppState.IsLoggedIn || !AppState.IsAdmin)
+        { Nav.NavigateTo("/login", true); return; }
+        @* 🔗 بەستنەوەی ڕووداو (Event Subscription):
+           کاتێک لە لاپەڕەیەکی تر (وەک Users) گۆڕانکارییەک دەبێت، لێرەش نوێ دەبێتەوە *@
+        AppState.OnStateChanged += HandleChanged;
+        await LoadStats();
+    }
+    @* 📡 هێنانەوەی ئامارەکان لە سێرڤەرەوە *@
+    private async Task LoadStats()
+    {
+        var stats = await AdminApi.GetStatsAsync();
+        if (stats != null)
+        {
+            pendingCount = stats.PendingCount;
+            userCount    = stats.CustomerCount;
+        }
+    }
+    @* 🔄 نوێکردنەوەی داینامیکی:
+       ئەم میتۆدە کاتێک بانگ دەکرێت کە AppState ئاگادارمان بکاتەوە لە گۆڕانکاری *@
+    private void HandleChanged()
+    {
+        InvokeAsync(async () =>
+        {
+            await LoadStats(); @* ئامارە نوێیەکان دەهێنێت (بۆ نموونە ئەگەر بەکارهێنەرێک سڕایەوە) *@
+            StateHasChanged(); @* UI نوێ دەکاتەوە *@
+        });
+    }
+    @* 🚪 چوونەدەرەوە: پاککردنەوەی داتاکان و ناردنەوە بۆ لاپەڕەی لۆگین *@
+    private void Logout() { AppState.Logout(); Nav.NavigateTo("/login", true); }
+    @* 📱 کۆنتڕۆڵی مۆبایل *@
+    private void ToggleMobileMenu() => mobileMenuOpen = !mobileMenuOpen;
+
+    private void CloseMobileMenu() => mobileMenuOpen = false;
+    @* 📍 ناونیشانی داینامیکی لاپەڕەکان:
+       بەپێی ڕێڕەوی (URL) لاپەڕەکە، ناونیشانێکی گونجاو دەگەڕێنێتەوە *@
+    private string GetPageTitle()
+    {
+        var uri = Nav.ToBaseRelativePath(Nav.Uri).ToLower().TrimEnd('/');
+        return uri switch
+        {
+            "admin" => "Dashboard",
+            "admin/users" => "User Management",
+            "admin/suppliers" => "Supplier Management",
+            "admin/services" => "Service Management",
+            "admin/bookings" => "Booking Management",
+            _ => "Admin"
+        };
+    }
+    @* 🧹 پاککردنەوە: کاتێک ئەدمین لاپەڕەکە جێدەهێڵێت، پەیوەندییەکە دەپچڕێنین بۆ پاراستنی ڕام *@
+    public void Dispose() => AppState.OnStateChanged -= HandleChanged;
+}
