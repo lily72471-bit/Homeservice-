@@ -1,19 +1,15 @@
 @page "/packages"
 @inject AppStateService AppState
-@* 🎊 بەشی ناساندنی پاکێجەکان: ڕوونکردنەوەی سوودەکانی کڕینی کۆمەڵە خزمەتگوزاری *@
 <div class="hero-banner" style="padding: 32px 40px; margin-bottom: 32px;">
     <h2>Service Packages</h2>
     <p>Save more with our curated service bundles. Choose a package that fits your needs and enjoy priority access to top professionals.</p>
 </div>
 
 <div class="packages-grid">
-    @* 🔄 خولانەوە بەناو پاکێجەکاندا: هێنانەوەی هەموو جۆرەکان لە AppState *@
     @foreach (var package in AppState.Packages)
     {
         <div class="package-card">
-            @* 🎨 سەردێڕی پاکێج: بەکارهێنانی ڕەنگی داینامیکی و گرادیێنت (Gradient) بۆ دیزاینێکی مۆدێرن *@
             <div class="package-header" style="background: linear-gradient(135deg, @package.Color, @(package.Color)CC);">
-                @* 🎖️ باج (Badge): وەک "Popular" یان "Best Value" ئەگەر هەبێت *@
                 @if (!string.IsNullOrEmpty(package.Badge))
                 {
                     <div class="package-badge">@package.Badge</div>
@@ -21,12 +17,10 @@
                 <h4>@package.Name</h4>
                 <p>@package.Description</p>
             </div>
-            @* 💰 نرخ و ماوە: نیشاندانی تێچووی پاکێجەکە (بۆ نموونە مانگانە یان ساڵانە) *@
             <div class="package-price">
                 <span class="amount">@package.Price.ToString("N0") IQD</span>
                 <span class="period"> / @package.PricePeriod</span>
             </div>
-            @* ✅ تایبەتمەندییەکان: لیستی ئەو خزمەتگوزارییانەی لەم پاکێجەدا بێبەرامبەرن یان داشکێنراون *@
             <ul class="package-features">
                 @foreach (var feature in package.IncludedServices)
                 {
@@ -36,7 +30,6 @@
                     </li>
                 }
             </ul>
-            @* 🔘 دوگمەی بەشداریکردن: بەهەمان ڕەنگی پاکێجەکە بۆ ڕێکی دیزاین *@
             <div class="package-actions">
                 <button class="btn btn-primary btn-block" style="background: linear-gradient(135deg, @package.Color, @(package.Color)CC);" @onclick="() => Subscribe(package)">
                     <i class="bi bi-check-lg"></i> Subscribe Now
@@ -45,12 +38,10 @@
         </div>
     }
 </div>
-@* 🖼️ پەنجەرەی بەشداریکردن: تەنها کاتێک دەردەکەوێت کە کڕیار کلیکی لە Subscribe کردبێت *@
 @if (showSubscribeModal)
 {
     <div class="modal-overlay" @onclick="CloseModal">
         <div class="modal-content" @onclick:stopPropagation="true">
-            @* 🔝 سەردێڕی پەنجەرەکە لەگەڵ ناوی پاکێجە هەڵبژێردراوەکە *@
             <div class="modal-header">
                 <h3>Subscribe to @selectedPackage?.Name</h3>
                 <button class="modal-close" @onclick="CloseModal"><i class="bi bi-x"></i></button>
@@ -58,7 +49,6 @@
             <div class="modal-body">
                 @if (subscribeSuccess)
                 {
-                    @* ✅ پەیامی سەرکەوتن: کاتێک بەشداریکردنەکە بە سەرکەوتوویی کۆتایی دێت *@
                     <div class="alert alert-success" style="margin-bottom: 0;">
                         <i class="bi bi-check-circle-fill"></i>
                         You've successfully subscribed to the @selectedPackage?.Name package!
@@ -66,11 +56,9 @@
                 }
                 else
                 {
-                    @* ℹ️ ڕوونکردنەوەی تێچوو: پێش ئەوەی کڕیار دوگمەی کۆتایی دابگرێت *@
                     <p style="margin-bottom: 20px; color: var(--text-secondary);">
                         You are about to subscribe to the <strong>@selectedPackage?.Name</strong> package for <strong>@selectedPackage?.Price.ToString("N0") IQD/@selectedPackage?.PricePeriod</strong>.
                     </p>
-                    @* 📊 کورتەی تێچوو (Summary Card): نیشاندانی ناوی پاکێج و شێوازی پارەدان و کۆی گشتی *@
                     <div class="summary-card" style="margin-bottom: 0;">
                         <div class="summary-row">
                             <span class="label">Package</span>
@@ -78,7 +66,6 @@
                         </div>
                         <div class="summary-row">
                             <span class="label">Billing</span>
-                            @* ئەگەر مانگانە بێت دەبێتە Monthly، ئەگەر ساڵانە بێت دەبێتە Yearly *@
                             <span class="value">@selectedPackage?.PricePeriod@("ly")</span>
                         </div>
                         <div class="summary-row total">
@@ -88,12 +75,9 @@
                     </div>
                 }
             </div>
-            @* 🦶 خوارەوەی پەنجەرەی بەشداریکردن *@
             <div class="modal-footer">
-                @* 🔘 تەنها ئەگەر بەشداریکردنەکە هێشتا سەرکەوتوو نەبووبێت، دوگمەیConfirm نیشان بدە *@
                 @if (!subscribeSuccess)
                 {
-                    @* ❌ دوگمەی داخستن: دەقەکەی دەگۆڕێت بەپێی باری سەرکەوتن (Close یان Cancel) *@
                     <button class="btn btn-primary" @onclick="ConfirmSubscribe">
                         <i class="bi bi-check-circle"></i> Confirm Subscription
                     </button>
@@ -103,25 +87,20 @@
         </div>
     </div>
 }
-@* 🏷️ بەشی ئۆفەرەکان: نیشاندانی داشکاندنە کاتییەکان بۆ ڕاکێشانی سەرنجی کڕیار *@
 <div class="section-header" style="margin-top: 16px;">
     <h3>Current Offers</h3>
 </div>
 
 <div class="offers-grid">
-    @* 🎁 خولانەوە بەناو ئۆفەرەکاندا: نیشاندانی هەموو داشکاندنە چالاکەکان لە AppState *@
     @foreach (var offer in AppState.Offers)
     {
-        @* 🎨 کارتی ئۆفەر: بەکارهێنانی ڕەنگ و شەفافیەت (Alpha) بۆ دروستکردنی ستایلێکی مۆدێرن *@
         <div class="offer-card" style="background: linear-gradient(135deg, @offer.Color, @(offer.Color)AA);">
             <h4>@offer.Title</h4>
             <p>@offer.Description</p>
-            @* 🎫 کۆدی داشکاندن: تەنها کاتێک نیشان دەدرێت کە ئۆفەرەکە کۆدی (Promo Code) هەبێت *@
             @if (!string.IsNullOrEmpty(offer.Code))
             {
                 <div class="offer-code">@offer.Code</div>
             }
-            @* ⏳ کاتی بەسەرچوون: بۆ دروستکردنی هەستی پەلەکردن (Urgency) لای کڕیار *@
             <div class="offer-expires">
                 <i class="bi bi-clock"></i> Expires @offer.ExpiresAt.ToString("MMM dd, yyyy")
             </div>
@@ -130,24 +109,20 @@
 </div>
 
 @code {
-    @* 🚩 گۆڕاوەکان بۆ کۆنترۆڵکردنی باری لاپەڕە *@
-    private bool showSubscribeModal;  @* بۆ پیشاندان یان شاردنەوەی پەنجەرەی بەشداریکردن *@
-    private bool subscribeSuccess;   @* بۆ دیاریکردنی ئەوەی ئایا بەشداریکردنەکە سەرکەوتوو بووە *@
-    private ServicePackage? selectedPackage;  @* ئەو پاکێجەی کڕیارەکە هەڵیبژاردووە *@
-    @* 🖱️ دەستپێکردنی بەشداریکردن: کاتێک کڕیار کلیک لە Subscribe دەکات *@
+    private bool showSubscribeModal; 
+    private bool subscribeSuccess;  
+    private ServicePackage? selectedPackage;  
+
     private void Subscribe(ServicePackage package)
     {
-        selectedPackage = package;  @* هەڵگرتنی زانیاری پاکێجەکە *@
-        showSubscribeModal = true;  @* کردنەوەی پەنجەرەکە *@
-        subscribeSuccess = false;  @* دڵنیابوونەوە لەوەی پەیامی سەرکەوتن جارێ نیشان نادات *@
+        selectedPackage = package; 
+        showSubscribeModal = true; 
+        subscribeSuccess = false;  
     }
-    @* ✅ دووپاتکردنەوە: کاتێک کڕیار لە ناو پەنجەرەکە کلیک لە Confirm دەکات *@
     private void ConfirmSubscribe()
     {
-        @* لێرە دەتوانیت لۆجیکی API زیاد بکەیت بۆ پاشکەوتکردن لە داتابەیس *@
         subscribeSuccess = true;
     }
-    @* ✖️ داخستنی پەنجەرە: پاککردنەوەی هەموو داتاکان بۆ ئەوەی جارێکی تر بەکاربێنەوە *@
     private void CloseModal()
     {
         showSubscribeModal = false;
