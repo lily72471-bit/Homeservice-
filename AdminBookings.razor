@@ -1,23 +1,19 @@
 @page "/admin/bookings"
 @inject AppStateService AppState
-@inject AdminApiService AdminApi // بانگکردنی سێرڤیسی ئەی پی ئای بۆ هێنان و ناردنی داتا لە داتابەیسەوە//
-@inject NavigationManager Nav // بۆ گواستنەوەی بەکارهێنەر لە لاپەڕەیەک بۆ لاپەڕەیەکی تر بە کۆد//
+@inject AdminApiService AdminApi 
+@inject NavigationManager Nav 
 
 <div class="admin-toolbar">
     <div class="filter-tabs">
-        @* Loop بۆ دروستکردنی دوگمەی فلتەرەکان بە شێوەیەکی داینامیکی *@
         @foreach (var f in filters)
-        { @* دیاریکردنی کڵاسی active ئەگەر فلتەرەکە هەڵبژێردرابێت، و گۆڕینی فلتەرەکە لەکاتی کلیک کردن *@
             <button class="filter-tab @(activeFilter == f ? "active" : "")" @onclick="() => activeFilter = f">
-                @f
-                @* ئەگەر فلتەرەکە 'All' بوو، هەموو ژمارەی داواکارییەکان پیشان بدە *@
+                
                 @if (f == "All")
                 {
                     <span class="tab-count">@orders.Count</span>
                 }
                 else
                 {
-                    @* ئەگەر فلتەرێکی تر بوو، تەنها ژمارەی ئەو داواکارییانە بژمێرە کە هەمان Statusـیان هەیە *@
                     var c = orders.Count(o => o.Status == f);
                     if (c > 0) { <span class="tab-count">@c</span> }
                 }
@@ -52,23 +48,18 @@ else
                     @foreach (var order in FilteredOrders)
                     {
                         <tr>
-                            @* نیشاندانی ناسنامەی داواکارییەکە بە هێمای # *@
                             <td>#@order.Id</td>
                             <td>
-                                @* نیشاندانی ناوی خزمەتگوزاری و جۆرەکەی لەژێر یەکتر بۆ ڕێکپۆشی *@
                                 <div class="cell-title">@order.ServiceName</div>
                                 <div class="cell-sub">@order.CategoryName</div>
                             </td>
-                            @* ئەگەر کارمەند دیاری نەکرابوو، هێمای (—) نیشان دەدات *@
                             <td>@(order.AssignedWorkerName ?? "—")</td>
                             <td>
-                                @* گۆڕینی ڕێکەوت بۆ شێوازێکی جوان (مانگ، ڕۆژ، ساڵ) لەگەڵ کاتەکەی *@
                                 <div>@order.ScheduledDate.ToString("MMM dd, yyyy")</div>
                                 <div class="cell-sub">@order.ScheduledTime</div>
                             </td>
                             <td class="cell-address">@order.Address</td>
                             <td class="cell-address" style="max-width: 200px;">
-                                @* ئەگەر تێبینی هەبوو نیشانی دەدات، ئەگەر نا هێمایەک بە ڕەنگی کاڵ دادەنێت *@
                                 @if (!string.IsNullOrEmpty(order.Notes))
                                 {
                                     <span title="@order.Notes">@order.Notes</span>
@@ -78,15 +69,12 @@ else
                                     <span style="color: #94a3b8;">—</span>
                                 }
                             </td>
-                            @* فۆرماتکردنی نرخەکە بە جۆرێک کە فاریزەی هەزارەکان دابنێت (وەک 25,000) *@
                             <td><strong>@order.TotalPrice.ToString("N0") IQD</strong></td>
                             <td>
-                                @* بەکارهێنانی کڵاسی CSS بەپێی Statusـەکە بۆ ئەوەی ڕەنگی باجەکە بگۆڕێت *@
                                 <span class="status-badge status-@order.Status.ToLower()">@order.Status</span>
                             </td>
                             <td>
                                 <div class="action-btns">
-                                    @* ئەگەر داواکارییەکە تازە بێت، دوگمەی قبوڵکردن و ڕەتکردنەوەی بۆ دادەنێت *@
                                     @if (order.Status == "Pending")
                                     {
                                         <button class="btn-action btn-approve" title="Approve"
@@ -98,7 +86,6 @@ else
                                             <i class="bi bi-x-lg"></i>
                                         </button>
                                     }
-                                    @* ئەگەر قبوڵکرابوو، ڕێگە دەدات ئیشەکە دەستپێبکات (In Progress) *@
                                     @if (order.Status == "Confirmed")
                                     {
                                         <button class="btn-action btn-inprogress" title="Mark In Progress"
@@ -106,7 +93,6 @@ else
                                             <i class="bi bi-play-fill"></i>
                                         </button>
                                     }
-                                    @* ئەگەر لە ئیشکردندا بوو، تەنها دوگمەی تەواوکردنی (Complete) بۆ دادەنێت *@
                                     @if (order.Status == "InProgress")
                                     {
                                         <button class="btn-action btn-approve" title="Mark Completed"
@@ -118,7 +104,6 @@ else
                             </td>
                         </tr>
                     }
-                    @* ئەگەر هیچ داتایەک نەبوو، ئەم پەیامە لەناو خشتەکەدا نیشان بدە *@
                     @if (!FilteredOrders.Any())
                     {
                         <tr><td colspan="9" class="empty-table">No bookings found for this filter.</td></tr>
@@ -128,14 +113,10 @@ else
         </div>
     </div>
 }
-@* بەشی مۆدێل بۆ دیاریکردنی کارمەند (Assign Worker) *@
 @if (showApproveModal && orderToApprove != null)
 {
-    @* فلتەرکردنی لیستی کارمەندەکان بەپێی پسپۆڕیەکەیان کە لەگەڵ جۆری داواکارییەکە بگونجێت *@
     var availableSuppliers = suppliers.Where(s => s.Specialization.Contains(orderToApprove.CategoryName, StringComparison.OrdinalIgnoreCase) || orderToApprove.CategoryName.Contains(s.Specialization, StringComparison.OrdinalIgnoreCase)).ToList();
-    @* ئەگەر هیچ کارمەندێکی پسپۆڕ نەبوو، هەموو لیستەکە نیشان بدە وەک جێگرەوە *@
     if (!availableSuppliers.Any()) availableSuppliers = suppliers;
-    @* stopPropagation ڕێگری دەکات لەوەی کاتێک ناو مۆدێلەکە کلیک دەکەیت، مۆدێلەکە دابخرێت *@
     <div class="modal-overlay" @onclick="CloseApproveModal">
         <div class="modal-card" @onclick:stopPropagation="true">
             <div class="modal-header">
@@ -146,7 +127,6 @@ else
                 <p style="margin-bottom: 1rem;">Assign a supplier for <strong>@orderToApprove.ServiceName</strong> (@orderToApprove.CategoryName).</p>
                 <div class="form-group">
                     <label class="form-label">Select Worker</label>
-                    @* بەستنەوەی هەڵبژاردنەکە (Select) بە گۆڕدراوی selectedWorkerId *@
                     <select class="form-input" @bind="selectedWorkerId">
                         <option value="0">-- Unassigned --</option>
                         @foreach (var s in availableSuppliers)
@@ -158,7 +138,6 @@ else
             </div>
             <div class="modal-footer">
                 <button class="btn-admin-ghost" @onclick="CloseApproveModal">Cancel</button>
-                @* ئەنجامدانی قبوڵکردنەکە دوای دیاریکردنی کارمەندەکە *@
                 <button class="btn-admin-primary" @onclick="ConfirmApproval">
                     <i class="bi bi-check-lg"></i> Approve Booking
                 </button>
@@ -166,7 +145,6 @@ else
         </div>
     </div>
 }
-@* بانگکردنی کۆمپۆنێنتی دڵنیابوونەوە بۆ هەڵوەشاندنەوەی داواکارییەکان *@
 <HomeService.Components.Shared.ConfirmModal
     IsVisible="showCancelConfirm"
     Title="Cancel Booking"
@@ -175,69 +153,52 @@ else
     OnClose="HandleCancelClose" />
 
 @code {
-    // پێناسەکردنی جۆرەکانی فلتەر کە لە بەشی سەرەوەی لاپەڕەکە نیشان دەدرێن
     private string[] filters = { "All", "Pending", "Confirmed", "InProgress", "Completed", "Cancelled" };
-    // فلتەری چالاک کە لە سەرەتادا لەسەر 'All' دانراوە
     private string activeFilter = "All";
-    // گۆڕدراوێک بۆ نیشاندانی دۆخی بارکردنی داتاکان (Loading)
     private bool loading = true;
-    // لیستی داواکارییەکان و کارمەندەکان کە لە سێرڤەرەوە دێن
     private List<AdminOrder> orders = [];
     private List<AdminSupplier> suppliers = [];
-    // بۆ هەڵگرتنی ئەو داواکارییەی کە ئەدمین دەیەوێت قبوڵی بکات یان کارمەندی بۆ دابنێت
     private AdminOrder? orderToApprove;
     private bool showApproveModal;
     private int selectedWorkerId = 0;
-    // ئەم میتۆدە کاتێک لاپەڕەکە دەکرێتەوە کار دەکات
     protected override async Task OnInitializedAsync()
     {
-        // پشکنینی ئەوەی ئایا بەکارهێنەر ئەدمینە؟ ئەگەر نا، دەینێرێتەوە بۆ لاپەڕەی Login
         if (!AppState.IsLoggedIn || !AppState.IsAdmin)
         { Nav.NavigateTo("/login", true); return; }
-        // هێنانی داتای داواکارییەکان و کارمەندەکان لە ڕێگەی API
         orders  = await AdminApi.GetOrdersAsync();
         suppliers = await AdminApi.GetSuppliersAsync();
-        // دوای تەواوبوونی بارکردن، loading دەبێتە false
         loading = false;
     }
-    // گەڕاندنەوەی لیستی فلتەرکراوی داواکارییەکان بەپێی ئەو فلتەرەی ئەدمین هەڵیبژاردووە
     private List<AdminOrder> FilteredOrders => activeFilter == "All"
         ? orders
         : orders.Where(o => o.Status == activeFilter).ToList();
-    // کردنەوەی پەنجەرەی قبوڵکردن (Modal) و دیاریکردنی ئەو داواکارییەی کلیکی لێکراوە
     private void OpenApproveModal(AdminOrder o)
     {
         orderToApprove = o;
-        selectedWorkerId = 0; // سفرکردنەوەی ئایدی کارمەند بۆ ئەوەی دانەیەکی نوێ هەڵبژێردرێت
+        selectedWorkerId = 0; 
         showApproveModal = true;
     }
-    // داخستنی پەنجەرەی مۆدێلەکە
     private void CloseApproveModal()
     {
         showApproveModal = false;
         orderToApprove = null;
     }
-    // کردارەکە پاش کلیک کردن لەسەر "Approve" لەناو مۆدێلەکەدا
     private async Task ConfirmApproval()
     {
         if (orderToApprove == null) return;
-        // دیاریکردنی ئایدی کارمەند ئەگەر هەڵبژێردرابێت
         int? workerId = selectedWorkerId > 0 ? selectedWorkerId : null;
-        // ناردنی نوێکارییەکە بۆ API، ئەگەر سەرکەوتوو بوو، داتاکانی ناو ئەپەکەش نوێ دەکرێنەوە
         if (await AdminApi.UpdateOrderStatusAsync(orderToApprove.Id, "Confirmed", workerId))
         {
             orderToApprove.Status = "Confirmed";
             if (workerId.HasValue)
             {
-                // دۆزینەوەی ناوی کارمەندەکە و دانانی لە لیستی سەرەکی بەبێ دووبارە بارکردنەوەی هەموو لاپەڕەکە
                 var supplier = suppliers.FirstOrDefault(s => s.Id == workerId.Value);
                 orderToApprove.AssignedWorkerName = supplier?.Name;
             }
-            AppState.NotifyStateChanged(); // ئاگادارکردنەوەی سیستەمەکە کە گۆڕانکاری ڕوویداوە
+            AppState.NotifyStateChanged(); 
         }
         CloseApproveModal();
     }
-    // میتۆدێکی گشتی بۆ گۆڕینی بارودۆخی (Status) هەر داواکارییەک
     private async Task UpdateStatus(AdminOrder order, string newStatus)
     {
         if (await AdminApi.UpdateOrderStatusAsync(order.Id, newStatus))
@@ -246,37 +207,25 @@ else
             AppState.NotifyStateChanged();
         }
     }
-    // تایبەت بە بەشی هەڵوەشاندنەوە (Cancel)
     private bool showCancelConfirm;
     private AdminOrder? orderToCancel;
     private string cancelMessage = "";
-    // کاتێک ئەدمین کلیک لە ڕەتکردنەوە (Reject) دەکات، داوای دڵنیایی لێ دەکرێت
     private void RejectOrder(AdminOrder o)
     {
         orderToCancel = o;
         cancelMessage = $"Are you sure you want to cancel booking #{o.Id} for {o.ServiceName}? This action cannot be undone.";
         showCancelConfirm = true;
     }
-    // کردارەکە دوای ئەوەی ئەدمین لە مۆدێلی Cancel کلیک لە "Confirm" یان "Close" دەکات
     private async Task HandleCancelClose(bool confirmed)
     {
         showCancelConfirm = false;
         if (confirmed && orderToCancel != null)
         {
-            // ئەگەر "بەڵێ" هەڵبژێردرا، بارودۆخەکە دەگۆڕێت بۆ Cancelled
             await UpdateStatus(orderToCancel, "Cancelled");
         }
         orderToCancel = null;
     }
-    // دوو میتۆدی کورت بۆ گۆڕینی خێرای حاڵەتی داواکارییەکان
     private Task StartOrder(AdminOrder o)    => UpdateStatus(o, "InProgress");
     private Task CompleteOrder(AdminOrder o) => UpdateStatus(o, "Completed");
 }
 
-Computed Property (FilteredOrders): لەبری ئەوەی چەند لیستێکی جیاواز دروست بکەیت، تەنها یەک لیستی سەرەکیت هەیە و ئەم کۆدە بەپێی فلتەرەکە داتاکانت بۆ دەپاڵێوێت. ئەمە کارایی (Performance) زۆر باشتر دەکات.
-
-State Management (AppState): بەکارهاتووە بۆ ئەوەی ئەگەر لە شوێنێکی تری ئەپەکە (وەک Dashboard) گۆڕانکاری ڕوویدا، ئەم لاپەڕەیەش بزانێت.
-
-Security: لە OnInitializedAsync پشکنین بۆ ئەدمین دەکرێت، ئەمە زۆر گرنگە بۆ ئەوەی کەسانی ئاسایی نەتوانن دەستیان بەم زانیارییانە بگات.
-
-Optimistic UI Updates: کۆدەکە سەرەتا داواکارییەکە بۆ API دەنێرێت، پاشان تەنها ئەو دێڕە لە لیستی ناو شاشەکە دەگۆڕێت نەک هەموو لیستەکە دووبارە باربکاتەوە، ئەمەش وادەکات ئەپەکە زۆر خێرا بێت لەبەرچاوی بەکارهێنەر.
