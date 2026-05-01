@@ -2,25 +2,20 @@
 @inject AppStateService AppState
 @inject AdminApiService AdminApi
 @inject NavigationManager Nav
-@* 🏠 کۆنتێنەری سەرەکی داشبۆرد *@
 <div class="dashboard-container">
-    @* 👋 کارتی بەخێرهێنان: بۆ دروستکردنی پەیوەندییەکی باش لەگەڵ بەکارهێنەر *@
     <div class="welcome-card">
         <div class="welcome-content">
             <h2>Welcome, @AppState.CurrentAppUser?.FullName!</h2>
             <p>Manage your assigned orders and update their status</p>
         </div>
     </div>
-    @* 📊 تۆڕی ئامارەکان (Stats Grid): نیشاندانی دۆخی کارەکان بە ڕەنگی جیاواز *@
     <div class="stats-grid">
-        @* 🔵 هەموو ئۆردەرەکان: ئایکۆنی Clipboard بۆ لیستکردن *@
         <div class="stat-card stat-primary">            <div class="stat-icon"><i class="bi bi-clipboard-check"></i></div>
             <div class="stat-content">
                 <div class="stat-value">@assignedOrders.Count</div>
                 <div class="stat-label">Assigned Orders</div>
             </div>
         </div>
-        @* 🟡 چاوەڕوانکراو (Pending): بە ڕەنگی ئاگادارکردنەوە بۆ ئەوەی وەستاکە خێرا بیبینێت *@
         <div class="stat-card stat-warning">
             <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
             <div class="stat-content">
@@ -28,7 +23,6 @@
                 <div class="stat-label">Pending</div>
             </div>
         </div>
-        @* 🔵 لە جێبەجێکردن (In Progress): نیشاندانی ئەو کارانەی ئێستا وەستاکە سەرقاڵیانە *@
         <div class="stat-card stat-info">
             <div class="stat-icon"><i class="bi bi-arrow-repeat"></i></div>
             <div class="stat-content">
@@ -36,7 +30,6 @@
                 <div class="stat-label">In Progress</div>
             </div>
         </div>
-        @* 🟢 تەواوکراو (Completed): ڕەنگی سەوز کە هەستی سەرکەوتنی کارەکان دەبەخشێت *@
         <div class="stat-card stat-success">
             <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
             <div class="stat-content">
@@ -52,13 +45,11 @@
             View All Orders
         </button>
     </div>
-    @* 🔄 باری چاوەڕوانی (Loading): نیشاندانی سپینەرێکی جوڵاو کاتێک داتاکان لە سێرڤەرەوە دەگەڕێنەوە *@
 
     @if (loading)
     {
         <div class="loading-spinner"><i class="bi bi-arrow-repeat spin"></i> Loading orders...</div>
     }
-    @* 📭 باری بەتاڵ (Empty State): ئەگەر وەستاکە هیچ کارێکی بۆ دابین نەکرابوو *@
     else if (!assignedOrders.Any())
     {
         <div class="empty-state">
@@ -67,7 +58,6 @@
             <p>You don't have any assigned orders at the moment.</p>
         </div>
     }
-    @* 📋 لیستی کارەکان: نیشاندانی تەنها 5 داواکاری کۆتایی وەک کارت (Card) *@
     else
     {
         <div class="orders-list">
@@ -76,15 +66,11 @@
                 <div class="order-card" @onclick='() => Nav.NavigateTo("/supplier/orders")'>
                     <div class="order-icon"><i class="bi bi-receipt"></i></div>
                     <div class="order-info">
-                        @* 🛠️ ناوی خزمەتگوزارییەکە *@
                         <h4>@order.ServiceName</h4>
-                        @* 📅 کات و جۆری خزمەتگوزاری *@
                         <p>@order.CategoryName &middot; @order.ScheduledDate.ToString("MMM dd, yyyy") @order.ScheduledTime</p>
                     </div>
                     <div class="order-right">
-                        @* 💰 نرخی کارەکە بە دینار (IQD) *@
                         <div class="order-price">@order.TotalPrice.ToString("N0") IQD</div>
-                        @* 🏷️ دۆخی کارەکە بە ڕەنگی داینامیکی *@
                         <span class="status-badge @GetStatusClass(order.Status)">@order.Status</span>
                     </div>
                 </div>
@@ -94,44 +80,33 @@
 </div>
 
 @code {
-    @* 🔄 باری بارکردن: لە سەرەتادا Trueـە بۆ ئەوەی سپینەرەکە دەربکەوێت *@
     private bool loading = true;
-    @* 📋 لیستی کارەکان: دروستکردنی لیستێکی بەتاڵ بۆ هەڵگرتنی ئۆردەرەکانی ئەم وەستایە *@
     private List<ServiceOrder> assignedOrders = new();
-    @* 🔢 ئامارە خێراکان: بەکارهێنانی Lambda بۆ ئەوەی ژمارەکان بە ئۆتۆماتیکی نوێ ببنەوە *@
     private int pendingOrders => assignedOrders.Count(o => o.Status == OrderStatus.Confirmed);
     private int inProgressOrders => assignedOrders.Count(o => o.Status == OrderStatus.InProgress);
     private int completedOrders => assignedOrders.Count(o => o.Status == OrderStatus.Completed);
 
     protected override async Task OnInitializedAsync()
     {
-        @* 🛡️ پشکنینی ڕێپێدان: دڵنیابوونەوە لەوەی تەنها Supplier دەتوانێت ئەم داتایانە ببینێت *@
         if (!AppState.IsLoggedIn || AppState.CurrentAppUser?.Role != UserRole.Supplier)
         {
             Nav.NavigateTo("/login", true);
             return;
         }
-        @* 📥 بانگکردنی داتاکان *@
         await LoadOrders();
-        @* ✅ تەواوبوونی بارکردن: سپینەرەکە لادەبات و لیستەکە نیشان دەدات *@
         loading = false;
     }
 
     private async Task LoadOrders()
     {
         // Get orders from API (database)
-        @* 🌐 پەیوەندی بە API: هێنانەوەی هەموو ئۆردەرەکان لە داتابەیسەوە *@
         var allOrders = await AdminApi.GetOrdersAsync();
         
         // Filter to only orders assigned to this supplier
-        @* 🆔 ناسنامەی وەستا: وەرگرتنی IDی ئەو کەسەی کە لۆگینە بۆ فلتەرکردن *@
         var supplierId = AppState.CurrentAppUser?.Id;
-        @* 🔍 فلتەرکردن و گۆڕین (Mapping): *@
         assignedOrders = allOrders
             .Where(o => o.AssignedWorkerId.HasValue && o.AssignedWorkerId == supplierId)
-            @* 📅 ڕیزکردن: نوێترین کارەکان هەمیشە لە سەرەوە دەبن *@
             .OrderByDescending(o => o.CreatedAt)
-            @* 🔄 دروستکردنی مۆدێلی نوێ (Projection): گۆڕینی داتای خاو بۆ مۆدێلی ServiceOrder *@
             .Select(o => new ServiceOrder
             {
                 Id = o.Id,
@@ -144,31 +119,22 @@
                 Address = o.Address,
                 Notes = o.Notes,
                 TotalPrice = o.TotalPrice,
-                @* 🏷️ پارس کردنی ستاتوس: گۆڕینی دەق (String) بۆ Enum بۆ ئەوەی لە کڵاسەکانی CSSدا بەکاری بهێنیت *@
                 Status = Enum.Parse<OrderStatus>(o.Status),
                 AssignedWorkerId = o.AssignedWorkerId,
                 AssignedWorkerName = o.AssignedWorkerName,
                 ContactPhone = o.ContactPhone
-                @* ... زانیارییەکانی تری وەک ناونیشان و تێبینی *@
             })
             .ToList();
     }
-    @* 🎨 دیاریکردنی کڵاسی CSS بەپێی دۆخی کارەکە *@
     private string GetStatusClass(OrderStatus status)
     {
         return status switch
         {
-            @* ⏳ چاوەڕوان: زۆرجار ڕەنگی زەرد یان پرتەقاڵی بۆ دادەنرێت *@
             OrderStatus.Pending => "status-pending",
-            @* ✅ پەسەندکراو: ڕەنگێکی تۆختر بۆ دڵنیایی *@
             OrderStatus.Confirmed => "status-confirmed",
-            @* ⚙️ لە جێبەجێکردن: ڕەنگی شین کە نیشانەی چالاکییە *@
             OrderStatus.InProgress => "status-inprogress",
-            @* ✨ تەواوبوو: ڕەنگی سەوز کە ئارامی دەبەخشێت بە وەستا و کڕیار *@
             OrderStatus.Completed => "status-completed",
-            @* ❌ هەڵوەشاوە: ڕەنگی سوور بۆ ئاگادارکردنەوەی خێرا *@
             OrderStatus.Cancelled => "status-cancelled",
-            @* ⚪ باری گریمانەیی: ئەگەر هیچ کام لەمانە نەبوو کڵاسێکی بەتاڵ دەگەڕێنێتەوە *@
             _ => ""
         };
     }
